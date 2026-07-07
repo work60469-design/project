@@ -1,0 +1,19 @@
+# --- Streamlit secrets ---
+.streamlit/secrets.toml
+
+
+credentials.json
+*.json.bak
+
+# --- Python ---
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+env/
+
+# --- OS / Editor ---
+.DS_Store
+.vscode/
+.idea/
