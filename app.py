@@ -2,6 +2,11 @@
 
 import streamlit as st
 
+import os
+import time
+
+os.environ["TZ"] = "Africa/Cairo"
+
 from auth.login import login_page
 from auth.cookie_manager import (
     get_auth_data_from_cookie,
