@@ -3,6 +3,10 @@
 import streamlit as st
 
 from auth.login import login_page
+from auth.cookie_manager import (
+    get_auth_data_from_cookie,
+    clear_auth_cookie
+)
 from ui.home_page import render_home_page
 from ui.student_page import render_student_page
 from ui.edit_student_page import render_edit_student_page
@@ -49,6 +53,20 @@ if "role" not in st.session_state:
 
 if "display_name" not in st.session_state:
     st.session_state.display_name = None
+
+# لو مش مسجل دخول فى الـ session الحالية، نحاول نسترجع
+# بياناته من الكوكي (يعنى كان مسجل دخول قبل كده ولسه صالحة)
+if not st.session_state.logged_in:
+
+    auth_data = get_auth_data_from_cookie()
+
+    if auth_data:
+        st.session_state.logged_in = True
+        st.session_state.username = auth_data["username"]
+        st.session_state.role = auth_data["role"]
+        st.session_state.display_name = (
+            auth_data["display_name"]
+        )
 
 # ---------------------
 # Login
@@ -151,6 +169,7 @@ else:
 
         # زر تسجيل الخروج
         if st.button("🚪 تسجيل الخروج"):
+            clear_auth_cookie()
             st.session_state.logged_in = False
             st.rerun()
 

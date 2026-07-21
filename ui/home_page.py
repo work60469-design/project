@@ -257,7 +257,7 @@ def render_home_page():
     render_announcements_section()
 
     # قسم الإشعارات يظهر للأدمن (محمد) بس
-    if st.session_state.username == "amal":
+    if st.session_state.username == "amal" or st.session_state.username == "sameh":
 
         render_notifications_section()
 
