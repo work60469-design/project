@@ -153,8 +153,8 @@ else:
                     "Report"
                 ])
 
-            # 2.1 صفحة مراجعة البيانات تظهر لسارة بس
-            if st.session_state.username == "sara":
+            # 2.1 صفحة مراجعة البيانات تظهر لسارة وامل بس
+            if st.session_state.username == "sara" or st.session_state.username == "amal":
                 pages.append("مراجعة البيانات")
 
         # لو جاي من زرار "تعديل" فى صفحة الطالب، نغير الصفحة
