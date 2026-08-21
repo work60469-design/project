@@ -210,5 +210,3 @@ def render_student_page():
         st.success(
             "تم تسجيل الطالب بنجاح ✅"
         )
-
-        st.balloons()
