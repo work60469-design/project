@@ -73,53 +73,6 @@ def student_exists(student_phone, grade):
 
 
 
-def get_headers_for_grade(grade):
-
-    if grade == "أولى ثانوي":
-
-        return [
-            "اسم الطالب",
-            "رقم الطالب",
-            "المحافظة",
-            "الحالة",
-            "الرقم اللى محول منه",
-            "الصف",
-            "الترم الاول",
-            "شهر 8",
-            "شهر 9",
-            "شهر 10",
-            "شهر 11",
-            "شهر 12",
-            "شهر 1",
-            "الملاحظة",
-            "سبب الملاحظة",
-            "تاريخ التسجيل",
-            "اسم الموظف"
-        ]
-
-    else:
-
-        return [
-            "اسم الطالب",
-            "رقم الطالب",
-            "المحافظة",
-            "الحالة",
-            "الرقم اللى محول منه",
-            "الصف",
-            "السنوى",
-            "الدعامة والحركة",
-            "التنسيق الهرمونى",
-            "التكاثر",
-            "المناعة",
-            "DNA & RNA",
-            "الملاحظة",
-            "سبب الملاحظة",
-            "تاريخ التسجيل",
-            "اسم الموظف"
-        ]
-
-
-
 def get_sheet_name_for_grade(grade):
 
     if grade == "أولى ثانوي":
@@ -148,7 +101,11 @@ def save_student(
 
     sheet_name = get_sheet_name_for_grade(grade)
     sheet = get_sheet(sheet_name)
-    headers = get_headers_for_grade(grade)
+
+    # بنقرأ أسماء الأعمدة من صف العناوين في الشيت نفسه
+    # عشان أي تعديل مستقبلي في الأعمدة (إضافة/حذف/تغيير ترتيب)
+    # ما يبوظش تسجيل البيانات
+    headers = sheet.row_values(1)
 
 
     row = []
@@ -312,7 +269,9 @@ def update_student(
     """
 
     sheet = get_sheet(sheet_name)
-    headers = get_headers_for_grade(grade)
+
+    # نفس الفكرة: نقرأ الهيدرز من الشيت مباشرة بدل ما تكون ثابتة فى الكود
+    headers = sheet.row_values(1)
 
     row = []
 
