@@ -1,23 +1,17 @@
 # services/student_service.py
-
 from services.sheets_service import get_sheet
 from datetime import datetime
 
 
 def normalize_phone(phone):
-
     phone = str(phone).strip()
-
     # لو Google Sheets شال الصفر الأول
     if phone.isdigit() and len(phone) == 10:
         phone = "0" + phone
-
     return phone
 
 
-
 def get_all_students():
-
     students_1 = get_sheet("Students 1")
     students_3 = get_sheet("Students 3")
 
@@ -28,58 +22,40 @@ def get_all_students():
     )
 
 
-
 def student_exists(student_phone, grade):
-
     student_phone = normalize_phone(
         student_phone
     )
 
-
     # نبحث داخل شيت الصف فقط
-
     if grade == "أولى ثانوي":
-
         sheet = get_sheet(
             "Students 1"
         )
-
     else:
-
         sheet = get_sheet(
             "Students 3"
         )
 
-
     students = sheet.get_all_records()
 
-
     for student in students:
-
         existing_phone = normalize_phone(
             student.get(
                 "رقم الطالب",
                 ""
             )
         )
-
-
         if existing_phone == student_phone:
-
             return True
-
 
     return False
 
 
-
 def get_sheet_name_for_grade(grade):
-
     if grade == "أولى ثانوي":
         return "Students 1"
-
     return "Students 3"
-
 
 
 def save_student(
@@ -95,10 +71,7 @@ def save_student(
     employee_name,
     **courses
 ):
-
-
     # تحديد الشيت
-
     sheet_name = get_sheet_name_for_grade(grade)
     sheet = get_sheet(sheet_name)
 
@@ -107,64 +80,34 @@ def save_student(
     # ما يبوظش تسجيل البيانات
     headers = sheet.row_values(1)
 
-
     row = []
-
-
     for header in headers:
-
-
         if header == "اسم الطالب":
             row.append(student_name)
-
-
         elif header == "رقم الطالب":
             row.append(student_phone)
-
-
         elif header == "المحافظة":
             row.append(governorate)
-
-
         elif header == "الحالة":
             row.append(student_status)
-
-        
         elif header == "الرقم اللى محول منه":
             row.append(transfer_phone)
-
-
         elif header == "الصف":
             row.append(grade)
-
-
         elif header in courses:
             row.append(courses[header])
-
-
         elif header == "الملاحظة":
             row.append(note)
-
-
         elif header == "سبب الملاحظة":
             row.append(note_reason)
-
-
         elif header == "تاريخ التسجيل":
             row.append(registration_date)
-
-
         elif header == "اسم الموظف":
             row.append(employee_name)
-
-
         else:
             row.append("")
 
-
-
     sheet.append_row(row)
-
 
 
 def find_students_by_phone(student_phone):
@@ -174,28 +117,22 @@ def find_students_by_phone(student_phone):
     لو اتسجل أكتر من مرة).
 
     بيرجع ليستة, كل عنصر فيها dict فيه:
-        - sheet_name: اسم الشيت اللى موجود فيه السطر
-        - row_number: رقم السطر الحقيقى فى الشيت (لاستخدامه فى التعديل)
-        - data: بيانات السطر نفسه
+    - sheet_name: اسم الشيت اللى موجود فيه السطر
+    - row_number: رقم السطر الحقيقى فى الشيت (لاستخدامه فى التعديل)
+    - data: بيانات السطر نفسه
     """
-
     student_phone = normalize_phone(student_phone)
-
     results = []
 
     for sheet_name in ["Students 1", "Students 3"]:
-
         sheet = get_sheet(sheet_name)
         records = sheet.get_all_records()
 
         for index, record in enumerate(records):
-
             existing_phone = normalize_phone(
                 record.get("رقم الطالب", "")
             )
-
             if existing_phone == student_phone:
-
                 results.append({
                     "sheet_name": sheet_name,
                     # +2 = +1 لصف العناوين, +1 لأن الفهرسة بتبدأ من صفر
@@ -204,7 +141,6 @@ def find_students_by_phone(student_phone):
                 })
 
     return results
-
 
 
 def log_edit(
@@ -220,9 +156,7 @@ def log_edit(
     يسجل فى شيت "Edit Log" تفاصيل أي تعديل بيحصل على بيانات طالب:
     امتى حصل، مين اللي عدل، وايه اللي اتغير بالظبط.
     """
-
     log_sheet = get_sheet("Edit Log")
-
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     log_sheet.append_row([
@@ -237,15 +171,12 @@ def log_edit(
     ])
 
 
-
 def delete_student(sheet_name, row_number):
     """
     يحذف سطر بالكامل من الشيت (حذف تسجيل طالب نهائيًا).
     """
-
     sheet = get_sheet(sheet_name)
     sheet.delete_rows(row_number)
-
 
 
 def update_student(
@@ -267,53 +198,58 @@ def update_student(
     يحدث سطر موجود فعلا فى الشيت (تعديل مباشر على نفس السطر
     بدل إضافة سطر جديد).
     """
-
     sheet = get_sheet(sheet_name)
 
     # نفس الفكرة: نقرأ الهيدرز من الشيت مباشرة بدل ما تكون ثابتة فى الكود
     headers = sheet.row_values(1)
 
     row = []
-
     for header in headers:
-
         if header == "اسم الطالب":
             row.append(student_name)
-
         elif header == "رقم الطالب":
             row.append(student_phone)
-
         elif header == "المحافظة":
             row.append(governorate)
-
         elif header == "الحالة":
             row.append(student_status)
-
         elif header == "الرقم اللى محول منه":
             row.append(transfer_phone)
-
         elif header == "الصف":
             row.append(grade)
-
         elif header in courses:
             row.append(courses[header])
-
         elif header == "الملاحظة":
             row.append(note)
-
         elif header == "سبب الملاحظة":
             row.append(note_reason)
-
         elif header == "تاريخ التسجيل":
             row.append(registration_date)
-
         elif header == "اسم الموظف":
             row.append(employee_name)
-
         else:
             row.append("")
 
     last_column_letter = chr(64 + len(headers))
     cell_range = f"A{row_number}:{last_column_letter}{row_number}"
-
     sheet.update(cell_range, [row])
+
+
+# ---------------------------------------------------
+# دالة جديدة: بترجع كل الطلاب اللي موظف معين سجلهم
+# ---------------------------------------------------
+
+def get_students_by_employee(employee_name):
+    """
+    بترجع كل الطلاب اللي الموظف ده بالذات سجلهم
+    (من كل الشيتات، مش بس شيت واحد)، عشان يقدر
+    يرجع يشوفهم في أي وقت حتى لو قفل المتصفح.
+    """
+    all_students = get_all_students()
+
+    return [
+        student for student in all_students
+        if str(
+            student.get("اسم الموظف", "")
+        ).strip() == str(employee_name).strip()
+    ]
