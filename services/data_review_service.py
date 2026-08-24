@@ -1,5 +1,7 @@
 # services/data_review_service.py
 
+import re
+
 import pandas as pd
 
 from services.sheets_service import get_sheet
@@ -31,8 +33,23 @@ def normalize_phone(phone):
 
 
 def normalize_name(name):
+    """
+    بتنضف اسم الطالب من أي مسافات زيادة، سواء قبل الاسم،
+    بعده، أو بين أجزاء الاسم (الاسم الأول / اسم الأب / اسم الجد).
 
-    return str(name).strip()
+    أي عدد من المسافات (أو تابات) بيتحول لمسافة واحدة بالظبط،
+    عشان مسافة زيادة مكتوبة غلط ما تخليش المقارنة تعتبر نفس
+    الاسم "مختلف" عن نفسه.
+
+    مثال:
+        "  محمد    واصف  محمد "  ->  "محمد واصف محمد"
+    """
+
+    name = str(name)
+
+    name = re.sub(r"\s+", " ", name)
+
+    return name.strip()
 
 
 def normalize_employee(name):
@@ -76,13 +93,17 @@ def load_platform_records(csv_file):
     return records
 
 
-def load_sheet_records(selected_date):
+def load_sheet_records(start_date, end_date):
     """
     بيرجع تسجيلات الجوجل شيت (Students 1 + Students 3) اللي
-    حصلت فى التاريخ المطلوب بس.
+    حصلت فى الفترة من start_date لحد end_date (شامل الاتنين).
+
+    لو start_date == end_date (زي الوضع الافتراضي: يوم واحد بس)
+    بيرجع نفس سلوك اليوم الواحد القديم بالظبط.
     """
 
-    target_date = str(selected_date)
+    start_str = str(start_date)
+    end_str = str(end_date)
 
     records = []
 
@@ -98,7 +119,12 @@ def load_sheet_records(selected_date):
                 row.get(SHEET_DATE_COLUMN, "")
             ).strip()
 
-            if registration_date != target_date:
+            if not registration_date:
+                continue
+
+            # التاريخ متسجل دايمًا بصيغة YYYY-MM-DD (زي str(date))
+            # فالمقارنة كنص بتشتغل صح لترتيب التواريخ
+            if not (start_str <= registration_date <= end_str):
                 continue
 
             raw_name = row.get(SHEET_NAME_COLUMN, "")
