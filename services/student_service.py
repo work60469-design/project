@@ -1,6 +1,9 @@
 # services/student_service.py
 from services.sheets_service import get_sheet
 from datetime import datetime
+from zoneinfo import ZoneInfo
+
+CAIRO_TZ = ZoneInfo("Africa/Cairo")
 
 
 def normalize_phone(phone):
@@ -75,6 +78,13 @@ def save_student(
     sheet_name = get_sheet_name_for_grade(grade)
     sheet = get_sheet(sheet_name)
 
+    # وقت التسجيل الفعلي: بيتولد من السيرفر نفسه لحظة استدعاء
+    # الدالة دي، مش جاي من أي إدخال أو تعديل من الموظف، عشان يكون
+    # مرجع موثوق لإثبات امتى فعليًا حصلت الإضافة
+    actual_registration_time = datetime.now(CAIRO_TZ).strftime(
+        "%Y-%m-%d %H:%M:%S"
+    )
+
     # بنقرأ أسماء الأعمدة من صف العناوين في الشيت نفسه
     # عشان أي تعديل مستقبلي في الأعمدة (إضافة/حذف/تغيير ترتيب)
     # ما يبوظش تسجيل البيانات
@@ -104,6 +114,8 @@ def save_student(
             row.append(registration_date)
         elif header == "اسم الموظف":
             row.append(employee_name)
+        elif header == "وقت التسجيل الفعلي":
+            row.append(actual_registration_time)
         else:
             row.append("")
 
@@ -157,7 +169,7 @@ def log_edit(
     امتى حصل، مين اللي عدل، وايه اللي اتغير بالظبط.
     """
     log_sheet = get_sheet("Edit Log")
-    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    timestamp = datetime.now(CAIRO_TZ).strftime("%Y-%m-%d %H:%M:%S")
 
     log_sheet.append_row([
         timestamp,
@@ -197,11 +209,27 @@ def update_student(
     """
     يحدث سطر موجود فعلا فى الشيت (تعديل مباشر على نفس السطر
     بدل إضافة سطر جديد).
+
+    ملاحظة: عمود "وقت التسجيل الفعلي" مش بيتغير هنا عن قصد،
+    عشان يفضل يمثل وقت الإضافة الأصلي للطالب مش وقت آخر تعديل
+    (وقت التعديلات بيتسجل بالفعل فى شيت "Edit Log" عن طريق log_edit).
     """
     sheet = get_sheet(sheet_name)
 
     # نفس الفكرة: نقرأ الهيدرز من الشيت مباشرة بدل ما تكون ثابتة فى الكود
     headers = sheet.row_values(1)
+
+    # هنقرا القيمة الحالية لعمود "وقت التسجيل الفعلي" (لو موجود)
+    # عشان نحافظ عليها زي ما هي ومنمسحهاش أثناء التحديث
+    existing_actual_time = ""
+    if "وقت التسجيل الفعلي" in headers:
+        try:
+            existing_row = sheet.row_values(row_number)
+            col_index = headers.index("وقت التسجيل الفعلي")
+            if col_index < len(existing_row):
+                existing_actual_time = existing_row[col_index]
+        except Exception:
+            existing_actual_time = ""
 
     row = []
     for header in headers:
@@ -227,6 +255,8 @@ def update_student(
             row.append(registration_date)
         elif header == "اسم الموظف":
             row.append(employee_name)
+        elif header == "وقت التسجيل الفعلي":
+            row.append(existing_actual_time)
         else:
             row.append("")
 
