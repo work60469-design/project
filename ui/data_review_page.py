@@ -44,14 +44,30 @@ def render_data_review_page():
 
     st.caption(
         "رفع ملف الـ CSV اللي بينزل من المنصة، ومقارنته "
-        "بالجوجل شيت لنفس التاريخ."
+        "بالجوجل شيت لنفس الفترة."
     )
 
-    selected_date = st.date_input(
-        "📅 التاريخ",
-        value=date.today(),
-        key="review_selected_date"
-    )
+    date_col1, date_col2 = st.columns(2)
+
+    with date_col1:
+        start_date = st.date_input(
+            "📅 من تاريخ",
+            value=date.today(),
+            key="review_start_date"
+        )
+
+    with date_col2:
+        end_date = st.date_input(
+            "📅 إلى تاريخ",
+            value=date.today(),
+            key="review_end_date"
+        )
+
+    if end_date < start_date:
+        st.error(
+            "تاريخ \"إلى\" لازم يكون بعد أو يساوي تاريخ \"من\""
+        )
+        return
 
     uploaded_file = st.file_uploader(
         "📤 رفع ملف CSV من المنصة",
@@ -71,7 +87,7 @@ def render_data_review_page():
             uploaded_file
         )
 
-        sheet_records = load_sheet_records(selected_date)
+        sheet_records = load_sheet_records(start_date, end_date)
 
         missing_in_sheet, missing_in_platform = compare_records(
             platform_records,
