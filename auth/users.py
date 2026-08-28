@@ -46,6 +46,11 @@ USERS = {
         "password": "01020678269",
         "role": "super_admin",
         "display_name": "مستر سامح"
+    },
+     "Heba": {
+        "password": "hEbA.9876#",
+        "role": "support",
+        "display_name": "هبه"
     }
 
 }
