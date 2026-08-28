@@ -49,7 +49,7 @@ USERS = {
     },
      "Heba": {
         "password": "hEbA.9876#",
-        "role": "support",
+        "role": "followup",
         "display_name": "هبه"
     }
 
