@@ -5,6 +5,7 @@ import streamlit as st
 from services.sheets_service import get_sheet
 from datetime import datetime, date
 import calendar
+from config.constants import NOTES_OPTIONS
 
 
 # ==================================
@@ -365,16 +366,7 @@ GOVERNORATE_FIELD = "المحافظة"
 
 STATUS_VALUES_OF_INTEREST = ["جديد", "قديم"]
 
-NOTES_VALUES_OF_INTEREST = [
-    "لا يوجد",
-    "تخفيض",
-    "مجاني",
-    "قسط",
-    "سحب",
-    "حصة",
-    "حصتين",
-    "أخرى"
-]
+NOTES_VALUES_OF_INTEREST = NOTES_OPTIONS
 
 
 def _compute_categorical_stats_for_sheet(
@@ -539,7 +531,7 @@ def _compute_withdrawn_for_sheet(
             record.get(NOTES_FIELD, "")
         ).strip()
 
-        if notes_value != "سحب":
+        if notes_value != "سحب الاشتراك":
             continue
 
         registration_date = _parse_date_safe(
